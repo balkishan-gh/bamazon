@@ -3,8 +3,11 @@ const crypto = require("crypto");
 const bcrypt = require("bcryptjs");
 // const nodemailer = require('nodemailer');
 // const sendgridTransport = require('nodemailer-sendgrid-transport');
+
 // const formData = require("form-data");
 // const Mailgun = require("mailgun.js");
+
+const AWS = require("aws-sdk");
 
 const User = require("../models/user");
 
@@ -15,11 +18,18 @@ const User = require("../models/user");
 //     },
 //   })
 // );
+
 // const API_KEY = "";
 // const DOMAIN = "";
-
 // const mailgun = new Mailgun(formData);
 // const client = mailgun.client({ username: "api", key: API_KEY });
+
+AWS.config.update({
+  accessKeyId: process.env.ACCESS_KEY,
+  secretAccessKey: process.env.SECRET_KEY,
+  region: "ap-south-1", // Use the appropriate AWS region
+});
+const ses = new AWS.SES({ apiVersion: "2010-12-01" });
 
 exports.getLogin = (req, res, next) => {
   let message = req.flash("error");
@@ -111,13 +121,13 @@ exports.postSignup = (req, res, next) => {
           //   subject: 'Signup succeeded!',
           //   html: '<h1>You successfully signed up!</h1>'
           // });
+
           // const messageData = {
           //   from: "Bal Kishan <balkishan23dec@gmail.com>",
           //   to: [email],
           //   subject: "Hello",
           //   text: "Testing some Mailgun awesomeness!",
           // };
-
           // return client.messages
           //   .create(DOMAIN, messageData)
           //   .then((res) => {
@@ -126,6 +136,26 @@ exports.postSignup = (req, res, next) => {
           //   .catch((err) => {
           //     console.log(err);
           //   });
+
+          const params = {
+            Source: process.env.SENDER_EMAIL,
+            Destination: {
+              ToAddresses: [email],
+            },
+            Message: {
+              Body: {
+                Text: { Data: "You're successfully signed up." },
+              },
+              Subject: { Data: "Confirmation Mail" },
+            },
+          };
+          ses.sendEmail(params, (err, data) => {
+            if (err) {
+              console.error("Error sending email:", err);
+            } else {
+              console.log("Email sent:", data);
+            }
+          });
         })
         .catch((err) => {
           console.log(err);
