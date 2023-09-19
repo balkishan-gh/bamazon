@@ -15,7 +15,8 @@ const { v4: uuidv4 } = require("uuid");
 const errorController = require("./controllers/error");
 const User = require("./models/user");
 
-const MONGODB_URI = "mongodb://127.0.0.1:27017/shopDB";
+const MONGODB_URI =
+  process.env.MONGODB_URI || "mongodb://127.0.0.1:27017/shopDB";
 
 const app = express();
 const store = new MongoDBStore({
@@ -111,11 +112,18 @@ app.use((error, req, res, next) => {
   });
 });
 
+const PORT = process.env.PORT || 3000;
+
 mongoose
-  .connect(MONGODB_URI)
+  .connect(MONGODB_URI, {
+    useNewUrlParser: true,
+    useUnifiedTopology: true,
+  })
   .then((result) => {
-    app.listen(3000);
+    app.listen(PORT);
   })
   .catch((err) => {
     console.log(err);
   });
+
+// /?retryWrites=true&w=majority
