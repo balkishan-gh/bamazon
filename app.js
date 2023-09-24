@@ -115,15 +115,13 @@ app.use((error, req, res, next) => {
 const PORT = process.env.PORT || 3000;
 
 mongoose
-  .connect(MONGODB_URI, {
+  .connect("mongodb://127.0.0.1:27017/shopDB", {
     useNewUrlParser: true,
     useUnifiedTopology: true,
   })
   .then((result) => {
-    app.listen(PORT);
+    app.listen(3000);
   })
   .catch((err) => {
     console.log(err);
   });
-
-// /?retryWrites=true&w=majority
