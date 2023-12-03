@@ -18,6 +18,8 @@ const User = require("./models/user");
 const MONGODB_URI =
   process.env.MONGODB_URI || "mongodb://127.0.0.1:27017/shopDB";
 
+// const MONGODB_URI = "mongodb://127.0.0.1:27017/shopDB";
+
 const app = express();
 const store = new MongoDBStore({
   uri: MONGODB_URI,
