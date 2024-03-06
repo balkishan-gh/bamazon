@@ -13,8 +13,8 @@ const multer = require("multer");
 const { v4: uuidv4 } = require("uuid");
 const serverless = require("serverless-http");
 
-const errorController = require("./controllers/error");
-const User = require("./models/user");
+const errorController = require("../../controllers/error");
+const User = require("../../models/user");
 
 // const MONGODB_URI =
 //   process.env.MONGODB_URI || "mongodb://127.0.0.1:27017/bamazonDB";
@@ -52,9 +52,9 @@ const fileFilter = (req, file, cb) => {
 api.set("view engine", "ejs");
 api.set("views", "views");
 
-const adminRoutes = require("./routes/admin");
-const shopRoutes = require("./routes/shop");
-const authRoutes = require("./routes/auth");
+const adminRoutes = require("../../routes/admin");
+const shopRoutes = require("../../routes/shop");
+const authRoutes = require("../../routes/auth");
 
 api.use(bodyParser.urlencoded({ extended: false }));
 api.use(
