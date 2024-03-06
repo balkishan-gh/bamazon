@@ -11,6 +11,7 @@ const csrf = require("csurf");
 const flash = require("connect-flash");
 const multer = require("multer");
 const { v4: uuidv4 } = require("uuid");
+const serverless = require("serverless-http");
 
 const errorController = require("./controllers/error");
 const User = require("./models/user");
@@ -18,9 +19,9 @@ const User = require("./models/user");
 // const MONGODB_URI =
 //   process.env.MONGODB_URI || "mongodb://127.0.0.1:27017/bamazonDB";
 
-const MONGODB_URI = "mongodb://127.0.0.1:27017/bamazonDB";
+const MONGODB_URI = process.env.MONGODB_URI;
 
-const app = express();
+const api = express();
 const store = new MongoDBStore({
   uri: MONGODB_URI,
   collection: "sessions",
@@ -48,20 +49,20 @@ const fileFilter = (req, file, cb) => {
   }
 };
 
-app.set("view engine", "ejs");
-app.set("views", "views");
+api.set("view engine", "ejs");
+api.set("views", "views");
 
 const adminRoutes = require("./routes/admin");
 const shopRoutes = require("./routes/shop");
 const authRoutes = require("./routes/auth");
 
-app.use(bodyParser.urlencoded({ extended: false }));
-app.use(
+api.use(bodyParser.urlencoded({ extended: false }));
+api.use(
   multer({ storage: fileStorage, fileFilter: fileFilter }).single("image")
 );
-app.use(express.static(path.join(__dirname, "public")));
-app.use("/images", express.static(path.join(__dirname, "images")));
-app.use(
+api.use(express.static(path.join(__dirname, "public")));
+api.use("/images", express.static(path.join(__dirname, "images")));
+api.use(
   session({
     secret: "my secret",
     resave: false,
@@ -69,16 +70,21 @@ app.use(
     store: store,
   })
 );
-app.use(csrfProtection);
-app.use(flash());
+api.use(csrfProtection);
+api.use(flash());
 
-app.use((req, res, next) => {
+api.use((req, res, next) => {
+  console.log("Hi Bal Kishan");
+  next();
+});
+
+api.use((req, res, next) => {
   res.locals.isAuthenticated = req.session.isLoggedIn;
   res.locals.csrfToken = req.csrfToken();
   next();
 });
 
-app.use((req, res, next) => {
+api.use((req, res, next) => {
   // throw new Error('Sync Dummy');
   if (!req.session.user) {
     return next();
@@ -96,15 +102,15 @@ app.use((req, res, next) => {
     });
 });
 
-app.use("/admin", adminRoutes);
-app.use(shopRoutes);
-app.use(authRoutes);
+api.use("/admin", adminRoutes);
+api.use(shopRoutes);
+api.use(authRoutes);
 
-app.get("/500", errorController.get500);
+api.get("/500", errorController.get500);
 
-app.use(errorController.get404);
+api.use(errorController.get404);
 
-app.use((error, req, res, next) => {
+api.use((error, req, res, next) => {
   // res.status(error.httpStatusCode).render(...);
   // res.redirect('/500');
   res.status(500).render("500", {
@@ -114,16 +120,21 @@ app.use((error, req, res, next) => {
   });
 });
 
-const PORT = process.env.PORT || 3000;
+// const PORT = process.env.PORT || 3000;
 
 mongoose
-  .connect("mongodb://127.0.0.1:27017/shopDB", {
+  .connect(process.env.MONGODB_URI, {
     useNewUrlParser: true,
     useUnifiedTopology: true,
   })
   .then((result) => {
-    app.listen(3000);
+    // api.listen(3000);
+    console.log("Connected");
   })
   .catch((err) => {
     console.log(err);
   });
+
+const handler = serverless(api);
+
+module.exports = handler;

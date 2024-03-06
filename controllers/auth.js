@@ -106,6 +106,7 @@ exports.postLogin = (req, res, next) => {
               console.log(err);
               res.redirect("/");
             });
+            // res.redirect("/");
           }
           return res.status(422).render("auth/login", {
             path: "/login",
