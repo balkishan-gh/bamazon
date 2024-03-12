@@ -5,9 +5,7 @@
   "main": "api.js",
   "scripts": {
     "test": "echo \"Error: no test specified\" && exit 1",
-    "start": "nodemon app.js",
-    "build": "npm install && npm run build",
-    "start-server": "node app.js"
+    "start": "node app.js"
   },
   "author": "Bal Kishan",
   "license": "ISC",
